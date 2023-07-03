@@ -1,23 +1,24 @@
 package dice
 
 import (
-	"errors"
 	"math/rand"
 )
 
 type Option interface {
-	Apply(d *dice) error
+	Apply(d *diceEngine) error
 }
 
 type OptionSeedRandom struct {
 	Seed int64
 }
 
-func (o *OptionSeedRandom) Apply(d *dice) error {
+func (o *OptionSeedRandom) Apply(d *diceEngine) error {
 	if d == nil {
-		return errors.New("dice is nil")
+		return ErrOptionNoDice
 	}
 
+	//nolint:gosec // We don't need a cryptographically secure random number generator
 	d.random = rand.New(rand.NewSource(o.Seed))
+
 	return nil
 }

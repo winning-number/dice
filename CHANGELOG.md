@@ -1,8 +1,8 @@
 # CHANGELOG
 
-## v0.0.1
+## v0.0.2
 
-- initial commit
-- implement dice package
-- implement ci
-- implement docs
+- update linter from codesystem
+- fix linter reports
+- update documentation
+- update ci

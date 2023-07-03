@@ -7,6 +7,16 @@ on:
     branches: [ main ]
 
 jobs:
+  codesystem:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Check codesystem
+      uses: gofast-pkg/codesystem@main
+      with:
+        type: 'lib'
+        context: '.'
 
   build:
     runs-on: ubuntu-latest
