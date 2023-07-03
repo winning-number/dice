@@ -12,12 +12,12 @@ func TestOptionSeedRandom_Apply(t *testing.T) {
 
 		err := opt.Apply(nil)
 		if assert.Error(t, err) {
-			assert.EqualError(t, err, "dice is nil")
+			assert.EqualError(t, err, ErrOptionNoDice.Error())
 		}
 	})
 	t.Run("Should be ok", func(t *testing.T) {
 		opt := &OptionSeedRandom{}
-		expectedDice := &dice{}
+		expectedDice := &diceEngine{}
 
 		err := opt.Apply(expectedDice)
 		if assert.NoError(t, err) {

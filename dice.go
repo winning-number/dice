@@ -1,7 +1,8 @@
+// Package dice allow to explore the virtual dice behavior.
+// Get a history of the dice throw, the number of time a face was picked, etc.
 package dice
 
 import (
-	"errors"
 	"fmt"
 	"math"
 	"math/rand"
@@ -25,57 +26,57 @@ type Dice interface {
 	String() string
 }
 
-type dice struct {
-	nbThrow int64
+type diceEngine struct {
+	random  *rand.Rand
 	faces   map[int32]int64
 	history []int32
+	nbThrow int64
 	nbFace  int32
-	random  *rand.Rand
 }
 
 // New instance dice returnment
 func New(nbFace int32, opts ...Option) (Dice, error) {
 	if nbFace <= 0 {
-		return nil, errors.New("The dice can't have a zero face or negative face")
+		return nil, ErrNewDiceSize
 	}
 
-	d := dice{
+	dice := diceEngine{
 		faces:  make(map[int32]int64, nbFace),
 		nbFace: nbFace,
+		//nolint:gosec // We don't need a cryptographically secure random number generator
 		random: rand.New(rand.NewSource(time.Now().Unix())),
 	}
 	for i := 1; i <= int(nbFace); i++ {
-		d.faces[int32(i)] = 0
+		dice.faces[int32(i)] = 0
 	}
 
 	// Apply options
 	for _, opt := range opts {
-		if err := opt.Apply(&d); err != nil {
+		if err := opt.Apply(&dice); err != nil {
 			return nil, err
 		}
 	}
 
-	return &d, nil
+	return &dice, nil
 }
 
 // Throw dice simulation.
-func (d *dice) Throw() int32 {
+func (d *diceEngine) Throw() int32 {
 	d.nbThrow++
-	ret := rand.Int31n(d.nbFace)
-	if d.random != nil {
-		ret = d.random.Int31n(d.nbFace)
-	}
+
+	ret := d.random.Int31n(d.nbFace)
 
 	// ret++ to avoid 0 value and allow the included last face value
 	ret++
 
 	d.faces[ret]++
 	d.history = append(d.history, ret)
+
 	return ret
 }
 
 // SetThrow dice manual setting
-func (d *dice) SetThrow(face int32) {
+func (d *diceEngine) SetThrow(face int32) {
 	d.nbThrow++
 
 	d.faces[face]++
@@ -83,22 +84,22 @@ func (d *dice) SetThrow(face int32) {
 }
 
 // History (getter)
-func (d dice) History() []int32 {
+func (d diceEngine) History() []int32 {
 	return d.history
 }
 
 // NBPick return the number time the face parameter was picked
-func (d dice) NBPick(face int32) int64 {
+func (d diceEngine) NBPick(face int32) int64 {
 	return d.faces[face]
 }
 
 // NBThrow getter value
-func (d dice) NBThrow() int64 {
+func (d diceEngine) NBThrow() int64 {
 	return d.nbThrow
 }
 
 // LeastPicks return the least picked faces
-func (d dice) LeastPicks() []Face {
+func (d diceEngine) LeastPicks() []Face {
 	var faces []Face
 	var min int64
 
@@ -122,7 +123,7 @@ func (d dice) LeastPicks() []Face {
 }
 
 // MorePicks return the more picked faces
-func (d dice) MorePicks() []Face {
+func (d diceEngine) MorePicks() []Face {
 	var faces []Face
 	var max int64
 
@@ -147,7 +148,7 @@ func (d dice) MorePicks() []Face {
 
 // Faces return face list to the given faces.
 // If one face is not found, it will be ignored from the return statement
-func (d dice) Faces(faces ...int32) []Face {
+func (d diceEngine) Faces(faces ...int32) []Face {
 	var list []Face
 	for _, face := range faces {
 		if val, ok := d.faces[face]; ok {
@@ -162,7 +163,7 @@ func (d dice) Faces(faces ...int32) []Face {
 }
 
 // FacesByNBPick return a face list which match with the nb pick parameter
-func (d dice) FacesByNBPick(nbPick int64) []Face {
+func (d diceEngine) FacesByNBPick(nbPick int64) []Face {
 	var faces []Face
 
 	for key, val := range d.faces {
@@ -178,14 +179,18 @@ func (d dice) FacesByNBPick(nbPick int64) []Face {
 }
 
 // String return a printable data info about the dice
-func (d dice) String() string {
-	result := fmt.Sprintf("the dice has %d number face and has be trow %d times.\n", d.nbFace, d.nbThrow)
+func (d diceEngine) String() string {
+	result := fmt.Sprintf(
+		"the dice has %d number face and has be trow %d times.\n",
+		d.nbFace,
+		d.nbThrow)
+
 	return result
 }
 
 // PickAscendingOrder return the faces in the acending order
 // If two faces has the same number pick, the first should be the least pick value
-func (d dice) PickAscendingOrder() []Face {
+func (d diceEngine) PickAscendingOrder() []Face {
 	faces := d.convertToFace()
 
 	// faces order
@@ -195,17 +200,19 @@ func (d dice) PickAscendingOrder() []Face {
 		}
 		if faces[i].Number == faces[j].Number &&
 			faces[i].PickValue < faces[j].PickValue {
+
 			return true
 		}
+
 		return false
 	})
 
 	return faces
 }
 
-// PickDescendingOrder return the faces in the decsending order
+// PickDescendingOrder return the faces in the descending order
 // If two faces has the same number pick, the first should be the least pick value
-func (d dice) PickDescendingOrder() []Face {
+func (d diceEngine) PickDescendingOrder() []Face {
 	faces := d.convertToFace()
 
 	// faces order
@@ -215,16 +222,18 @@ func (d dice) PickDescendingOrder() []Face {
 		}
 		if faces[i].Number == faces[j].Number &&
 			faces[i].PickValue < faces[j].PickValue {
+
 			return true
 		}
+
 		return false
 	})
 
 	return faces
 }
 
-func (d dice) convertToFace() []Face {
-	var faces []Face
+func (d diceEngine) convertToFace() []Face {
+	faces := []Face{}
 
 	for key, val := range d.faces {
 		faces = append(faces, Face{
@@ -232,5 +241,6 @@ func (d dice) convertToFace() []Face {
 			Number:    val,
 		})
 	}
+
 	return faces
 }

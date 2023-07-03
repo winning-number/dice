@@ -1,12 +1,12 @@
 # Dice
 
-![Static Badge](https://img.shields.io/badge/project%20use%20codesystem-green?link=https%3A%2F%2Fgithub.com%2Fgofast-pkg%2Fcodesystem)
+[![Static Badge](https://img.shields.io/badge/project%20use%20codesystem-green?link=https%3A%2F%2Fgithub.com%2Fgofast-pkg%2Fcodesystem)](https://github.com/gofast-pkg/codesystem)
 ![Build](https://github.com/winning-number/dice/actions/workflows/ci.yml/badge.svg)
 [![Go Reference](https://pkg.go.dev/badge/github.com/winning-number/dice.svg)](https://pkg.go.dev/github.com/winning-number/dice)
 [![codecov](https://codecov.io/gh/winning-number/dice/branch/main/graph/badge.svg?token=7TCE3QB21E)](https://codecov.io/gh/winning-number/dice)
 [![Release](https://img.shields.io/github/release/winning-number/dice?style=flat-square)](https://github.com/winning-number/dice/releases)
 [![Go Report Card](https://goreportcard.com/badge/github.com/winning-number/dice)](https://goreportcard.com/report/github.com/winning-number/dice)
-[![codebeat badge](https://codebeat.co/badges/6d11dead-fa65-4f84-b72d-e1218694a0ec)](https://codebeat.co/projects/github-com-winning-number-dice-main)
+[![codebeat badge](https://codebeat.co/badges/12a947eb-2c06-4f39-8e68-6dd316c471da)](https://codebeat.co/projects/github-com-winning-number-dice-main)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fwinning-number%2Fdice.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fwinning-number%2Fdice?ref=badge_shield)
 [![License](http://img.shields.io/badge/license-mit-blue.svg?style=flat-square)](https://raw.githubusercontent.com/winning-number/dice/blob/main/LICENSE)
 
