@@ -1,8 +1,5 @@
 # CHANGELOG
 
-## v0.0.2
+## v0.0.3
 
-- update linter from codesystem
-- fix linter reports
-- update documentation
-- update ci
+- community standards
