@@ -10,19 +10,37 @@ import (
 	"time"
 )
 
-// Dice describe a dice and the history
+// Dice describe a dice and its history
+//
+//go:generate mockery --name=Dice --output=mocks --filename=dice.go --outpkg=mocks
 type Dice interface {
+	// Throw dice simulation.
 	Throw() int32
+	// SetThrow dice manual setting
 	SetThrow(int32)
+	// History (getter) return the history of the dice throw
 	History() []int32
+	// NBPick return the number time the face parameter was picked
+	// If the face parameter is not in the dice, return 0
 	NBPick(face int32) int64
+	// NBThrow return the number of time the dice was thrown
 	NBThrow() int64
-	LeastPicks() []Face
-	MorePicks() []Face
+	// LeastPick return the least picked face
+	// If faces have the same number of pick, return all of them
+	LeastPick() []Face
+	// MostPick return the most picked face
+	// If faces have the same number of pick, return all of them
+	MorePick() []Face
+	// FacesByNBPick return all faces with the same number of pick
 	FacesByNBPick(int64) []Face
+	// Face return the face detail for the given face(s)
+	// If one face is not found, it will be ignored from the return statement
 	Faces(faces ...int32) []Face
-	PickAscendingOrder() (faces []Face)
-	PickDescendingOrder() (faces []Face)
+	// WeakestOrder return the faces in the weakest order
+	WeakestOrder() (faces []Face)
+	// BestOrder return the faces in the best order
+	BestOrder() (faces []Face)
+	// String return a string representation of the dice
 	String() string
 }
 
@@ -60,7 +78,6 @@ func New(nbFace int32, opts ...Option) (Dice, error) {
 	return &dice, nil
 }
 
-// Throw dice simulation.
 func (d *diceEngine) Throw() int32 {
 	d.nbThrow++
 
@@ -75,7 +92,6 @@ func (d *diceEngine) Throw() int32 {
 	return ret
 }
 
-// SetThrow dice manual setting
 func (d *diceEngine) SetThrow(face int32) {
 	d.nbThrow++
 
@@ -83,23 +99,19 @@ func (d *diceEngine) SetThrow(face int32) {
 	d.history = append(d.history, face)
 }
 
-// History (getter)
 func (d diceEngine) History() []int32 {
 	return d.history
 }
 
-// NBPick return the number time the face parameter was picked
 func (d diceEngine) NBPick(face int32) int64 {
 	return d.faces[face]
 }
 
-// NBThrow getter value
 func (d diceEngine) NBThrow() int64 {
 	return d.nbThrow
 }
 
-// LeastPicks return the least picked faces
-func (d diceEngine) LeastPicks() []Face {
+func (d diceEngine) LeastPick() []Face {
 	var faces []Face
 	var min int64
 
@@ -108,13 +120,13 @@ func (d diceEngine) LeastPicks() []Face {
 		if val < min {
 			min = val
 			faces = append([]Face{}, Face{
-				PickValue: key,
-				Number:    val,
+				Value:  key,
+				NBPick: val,
 			})
 		} else if val == min {
 			faces = append(faces, Face{
-				PickValue: key,
-				Number:    val,
+				Value:  key,
+				NBPick: val,
 			})
 		}
 	}
@@ -122,8 +134,7 @@ func (d diceEngine) LeastPicks() []Face {
 	return faces
 }
 
-// MorePicks return the more picked faces
-func (d diceEngine) MorePicks() []Face {
+func (d diceEngine) MorePick() []Face {
 	var faces []Face
 	var max int64
 
@@ -132,13 +143,13 @@ func (d diceEngine) MorePicks() []Face {
 		if val > max {
 			max = val
 			faces = append([]Face{}, Face{
-				PickValue: key,
-				Number:    val,
+				Value:  key,
+				NBPick: val,
 			})
 		} else if val == max {
 			faces = append(faces, Face{
-				PickValue: key,
-				Number:    val,
+				Value:  key,
+				NBPick: val,
 			})
 		}
 	}
@@ -146,15 +157,13 @@ func (d diceEngine) MorePicks() []Face {
 	return faces
 }
 
-// Faces return face list to the given faces.
-// If one face is not found, it will be ignored from the return statement
 func (d diceEngine) Faces(faces ...int32) []Face {
 	var list []Face
 	for _, face := range faces {
 		if val, ok := d.faces[face]; ok {
 			list = append(list, Face{
-				PickValue: face,
-				Number:    val,
+				Value:  face,
+				NBPick: val,
 			})
 		}
 	}
@@ -162,15 +171,14 @@ func (d diceEngine) Faces(faces ...int32) []Face {
 	return list
 }
 
-// FacesByNBPick return a face list which match with the nb pick parameter
 func (d diceEngine) FacesByNBPick(nbPick int64) []Face {
 	var faces []Face
 
 	for key, val := range d.faces {
 		if val == nbPick {
 			faces = append(faces, Face{
-				PickValue: key,
-				Number:    val,
+				Value:  key,
+				NBPick: val,
 			})
 		}
 	}
@@ -178,7 +186,6 @@ func (d diceEngine) FacesByNBPick(nbPick int64) []Face {
 	return faces
 }
 
-// String return a printable data info about the dice
 func (d diceEngine) String() string {
 	result := fmt.Sprintf(
 		"the dice has %d number face and has be trow %d times.\n",
@@ -188,18 +195,17 @@ func (d diceEngine) String() string {
 	return result
 }
 
-// PickAscendingOrder return the faces in the acending order
 // If two faces has the same number pick, the first should be the least pick value
-func (d diceEngine) PickAscendingOrder() []Face {
+func (d diceEngine) WeakestOrder() []Face {
 	faces := d.convertToFace()
 
 	// faces order
 	sort.Slice(faces, func(i, j int) bool {
-		if faces[i].Number < faces[j].Number {
+		if faces[i].NBPick < faces[j].NBPick {
 			return true
 		}
-		if faces[i].Number == faces[j].Number &&
-			faces[i].PickValue < faces[j].PickValue {
+		if faces[i].NBPick == faces[j].NBPick &&
+			faces[i].Value < faces[j].Value {
 
 			return true
 		}
@@ -210,18 +216,17 @@ func (d diceEngine) PickAscendingOrder() []Face {
 	return faces
 }
 
-// PickDescendingOrder return the faces in the descending order
 // If two faces has the same number pick, the first should be the least pick value
-func (d diceEngine) PickDescendingOrder() []Face {
+func (d diceEngine) BestOrder() []Face {
 	faces := d.convertToFace()
 
 	// faces order
 	sort.Slice(faces, func(i, j int) bool {
-		if faces[i].Number > faces[j].Number {
+		if faces[i].NBPick > faces[j].NBPick {
 			return true
 		}
-		if faces[i].Number == faces[j].Number &&
-			faces[i].PickValue < faces[j].PickValue {
+		if faces[i].NBPick == faces[j].NBPick &&
+			faces[i].Value < faces[j].Value {
 
 			return true
 		}
@@ -237,8 +242,8 @@ func (d diceEngine) convertToFace() []Face {
 
 	for key, val := range d.faces {
 		faces = append(faces, Face{
-			PickValue: key,
-			Number:    val,
+			Value:  key,
+			NBPick: val,
 		})
 	}
 

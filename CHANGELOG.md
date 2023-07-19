@@ -1,5 +1,8 @@
 # CHANGELOG
 
-## v0.0.3
+## v0.1.4
 
-- community standards
+- update codesystem
+- adding mocks
+- improve documentation
+- improve unit tests
