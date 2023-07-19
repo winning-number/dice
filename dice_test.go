@@ -166,7 +166,7 @@ func TestDice_NBThrow(t *testing.T) {
 	})
 }
 
-func TestDice_LeastPicks(t *testing.T) {
+func TestDice_LeastPick(t *testing.T) {
 	nbFace := int32(4)
 	t.Run("Should be ok with only one result", func(t *testing.T) {
 		dice := diceEngine{
@@ -177,11 +177,11 @@ func TestDice_LeastPicks(t *testing.T) {
 		dice.faces[3] = 1
 		dice.faces[4] = 8
 		expectedLeastPick := []Face{{
-			PickValue: 3,
-			Number:    1,
+			Value:  3,
+			NBPick: 1,
 		}}
 
-		leastPicks := dice.LeastPicks()
+		leastPicks := dice.LeastPick()
 		assert.ElementsMatch(t, expectedLeastPick, leastPicks)
 	})
 	t.Run("Should be ok with any result", func(t *testing.T) {
@@ -193,19 +193,19 @@ func TestDice_LeastPicks(t *testing.T) {
 		dice.faces[3] = 1
 		dice.faces[4] = 1
 		expectedLeastPick := []Face{{
-			PickValue: 3,
-			Number:    1,
+			Value:  3,
+			NBPick: 1,
 		}, {
-			PickValue: 4,
-			Number:    1,
+			Value:  4,
+			NBPick: 1,
 		}}
 
-		leastPicks := dice.LeastPicks()
+		leastPicks := dice.LeastPick()
 		assert.ElementsMatch(t, expectedLeastPick, leastPicks)
 	})
 }
 
-func TestDice_MorePicks(t *testing.T) {
+func TestDice_MorePick(t *testing.T) {
 	nbFace := int32(4)
 	t.Run("Should be ok with only one result", func(t *testing.T) {
 		dice := diceEngine{
@@ -216,11 +216,11 @@ func TestDice_MorePicks(t *testing.T) {
 		dice.faces[3] = 1
 		dice.faces[4] = 8
 		expectedMorePick := []Face{{
-			PickValue: 4,
-			Number:    8,
+			Value:  4,
+			NBPick: 8,
 		}}
 
-		morePicks := dice.MorePicks()
+		morePicks := dice.MorePick()
 		assert.ElementsMatch(t, expectedMorePick, morePicks)
 	})
 	t.Run("Should be ok with any result", func(t *testing.T) {
@@ -232,14 +232,14 @@ func TestDice_MorePicks(t *testing.T) {
 		dice.faces[3] = 1
 		dice.faces[4] = 8
 		expectedMorePick := []Face{{
-			PickValue: 1,
-			Number:    8,
+			Value:  1,
+			NBPick: 8,
 		}, {
-			PickValue: 4,
-			Number:    8,
+			Value:  4,
+			NBPick: 8,
 		}}
 
-		morePicks := dice.MorePicks()
+		morePicks := dice.MorePick()
 		assert.ElementsMatch(t, expectedMorePick, morePicks)
 	})
 }
@@ -256,18 +256,18 @@ func TestDice_Faces(t *testing.T) {
 		dice.faces[4] = 8
 		expectedFacesData := []Face{
 			{
-				PickValue: 4,
-				Number:    8,
+				Value:  4,
+				NBPick: 8,
 			},
 			{
-				PickValue: 1,
-				Number:    2,
+				Value:  1,
+				NBPick: 2,
 			}, {
-				PickValue: 5,
-				Number:    13,
+				Value:  5,
+				NBPick: 13,
 			}, {
-				PickValue: 2,
-				Number:    5,
+				Value:  2,
+				NBPick: 5,
 			},
 		}
 
@@ -294,8 +294,8 @@ func TestDice_FacesByNBPick(t *testing.T) {
 		dice.faces[4] = 14
 		expectedFacesData := []Face{
 			{
-				PickValue: 4,
-				Number:    14,
+				Value:  4,
+				NBPick: 14,
 			},
 		}
 
@@ -310,12 +310,12 @@ func TestDice_FacesByNBPick(t *testing.T) {
 		dice.faces[8] = 14
 		expectedFacesData := []Face{
 			{
-				PickValue: 4,
-				Number:    14,
+				Value:  4,
+				NBPick: 14,
 			},
 			{
-				PickValue: 8,
-				Number:    14,
+				Value:  8,
+				NBPick: 14,
 			},
 		}
 
@@ -337,7 +337,7 @@ func TestDice_String(t *testing.T) {
 	})
 }
 
-func TestDice_PickAscendingOrder(t *testing.T) {
+func TestDice_WeakestOrder(t *testing.T) {
 	t.Run("Should be ok", func(t *testing.T) {
 		dice := diceEngine{
 			faces: map[int32]int64{
@@ -350,33 +350,33 @@ func TestDice_PickAscendingOrder(t *testing.T) {
 		}
 		expectedFacesData := []Face{
 			{
-				PickValue: 3,
-				Number:    1,
+				Value:  3,
+				NBPick: 1,
 			},
 			{
-				PickValue: 1,
-				Number:    2,
+				Value:  1,
+				NBPick: 2,
 			},
 			{
-				PickValue: 4,
-				Number:    2,
+				Value:  4,
+				NBPick: 2,
 			},
 			{
-				PickValue: 2,
-				Number:    5,
+				Value:  2,
+				NBPick: 5,
 			},
 			{
-				PickValue: 5,
-				Number:    18,
+				Value:  5,
+				NBPick: 18,
 			},
 		}
 
-		faces := dice.PickAscendingOrder()
+		faces := dice.WeakestOrder()
 		assert.EqualValues(t, expectedFacesData, faces)
 	})
 }
 
-func TestDice_PickDescendingOrder(t *testing.T) {
+func TestDice_BestOrder(t *testing.T) {
 	t.Run("Should be ok", func(t *testing.T) {
 		dice := diceEngine{
 			faces: map[int32]int64{
@@ -389,28 +389,28 @@ func TestDice_PickDescendingOrder(t *testing.T) {
 		}
 		expectedFacesData := []Face{
 			{
-				PickValue: 5,
-				Number:    18,
+				Value:  5,
+				NBPick: 18,
 			},
 			{
-				PickValue: 2,
-				Number:    5,
+				Value:  2,
+				NBPick: 5,
 			},
 			{
-				PickValue: 1,
-				Number:    2,
+				Value:  1,
+				NBPick: 2,
 			},
 			{
-				PickValue: 4,
-				Number:    2,
+				Value:  4,
+				NBPick: 2,
 			},
 			{
-				PickValue: 3,
-				Number:    1,
+				Value:  3,
+				NBPick: 1,
 			},
 		}
 
-		faces := dice.PickDescendingOrder()
+		faces := dice.BestOrder()
 		assert.EqualValues(t, expectedFacesData, faces)
 	})
 }
